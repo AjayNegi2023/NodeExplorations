@@ -8,7 +8,7 @@ app.use(express.urlencoded({
     extended: false
 })); //Built-In MiddleWare
 
-//MiddleWare 
+//**************************************MiddleWare*******************************************
 // Middleware functions are functions that have access to the request object (req), 
 // the response object (res), and the next function in the application’s request-response 
 // cycle.The next function is a function in the Express router which, when invoked, executes
@@ -58,7 +58,7 @@ app.get("/users", (req, res) => {
 
     //Response Header
     // res.setHeader("MyName","Ajay Negi");
-    res.setHeader("X-MyName","Ajay Negi"); //  Always add X to custom Headers for good practice 
+    res.setHeader("X-MyName", "Ajay Negi"); //  Always add X to custom Headers for good practice 
 
     //Request Header
     console.log(req.headers);
@@ -79,11 +79,31 @@ app.get("/api/users/:id", (req, res) => {
     // console.log(req.params);
     const id = Number(req.params.id);
     const user = users.find((user) => user.id === id);
+    if (!user) {
+        return res.status(404).json({
+            message: "User Not found !"
+        })
+    }
     return res.json(user);
 })
 
 app.post("/api/users", (req, res) => {
+    //**************************************HTTP response status codes**************************************** */
+
+    // HTTP response status codes indicate whether a specific HTTP request has been successfully completed. 
+    // Responses are grouped in five classes:
+
+    // Informational responses (100 – 199)
+    // Successful responses (200 – 299)
+    // Redirection messages (300 – 399)
+    // Client error responses (400 – 499)
+    // Server error responses (500 – 599)
     const data = req.body;
+    if (!data || !data.first_name || !data.last_name || !data.gender || !data.Job_title) {
+        return res.status(400).json({
+            message: "All Fields are required ! "
+        }); //400 -> Bad Request 
+    }
     // console.log(data);
     // console.log("Length of Users is : "+users.length)
     //Create new USer
@@ -93,7 +113,8 @@ app.post("/api/users", (req, res) => {
     });
 
     fs.writeFile("./MOCK_DATA.json", JSON.stringify(users), (err, data) => {
-        return res.json({
+        //201 -> Created
+        return res.status(201).json({
             status: "success",
             message: `New user Create 1`,
             id: users.length + 1
